@@ -1,176 +1,248 @@
-# MCP Integration Manager: Simplifying MCP Setup for Coding Agents
+# MCP Hub
 
-## Product Vision
-A tool that makes it trivially easy to discover, install, and manage MCP servers across all coding agents (Cursor, Windsurf, Cline, VS Code, etc.) - eliminating configuration headaches and fragmentation.
+An intelligent gateway and management layer for [Model Context Protocol](https://modelcontextprotocol.io/) servers. MCP Hub sits between your AI coding agent (Cursor, Claude Code, Windsurf, etc.) and your upstream MCP servers, providing multi-server aggregation, resilience, token-aware optimization, and a web dashboard — all through a single endpoint.
 
-## Core Pain Points Identified
+## Why MCP Hub?
 
-Based on research of developer experiences with MCP in 2025, here are the critical pain points:
+When you connect multiple MCP servers to an AI agent, you quickly run into real problems:
 
-### 1. **Configuration Fragmentation**
-- **Cursor**: Uses `~/.cursor/mcp.json` or `.cursor/mcp.json`
-- **Windsurf**: Uses `~/.codeium/windsurf/mcp_config.json`
-- **Codex**: Uses `~/.codex/config.toml`
-- **Claude Desktop**: Uses different config format
-- **Problem**: Developers must learn different config formats and locations for each tool
+- **Token bloat** — 10 servers can consume 50k–80k+ tokens of context before you type anything, leaving little room for actual conversation.
+- **Fragile connections** — One crashed server takes down your whole tool setup with cryptic errors.
+- **No visibility** — You can't see which tools are being used, which are wasting context, or which keep failing.
+- **Configuration pain** — Every agent (Cursor, Windsurf, Codex, Claude) uses a different config format and location.
 
-### 2. **Poor Error Messages & Debugging**
-- "MCP server won't load" with obscure error messages
-- Agents fail to find global mcp.json files
-- Dependency/virtual environment issues with no clear guidance
-- No validation before runtime
+MCP Hub solves these by acting as a single MCP endpoint that aggregates, optimizes, and monitors all your upstream servers.
 
-### 3. **Dependency Hell**
-- Must have `npx` (Node.js) installed for JS-based servers
-- Must have `uvx` (uv/Python) installed for Python-based servers
-- No clear guidance on which dependencies are needed
-- Runtime failures when dependencies missing
+## Architecture
 
-### 4. **Discovery & Selection Chaos**
-- 10,000+ MCP servers across multiple registries ([MCP.so](https://mcp.so/), [GitHub Registry](https://github.blog/ai-and-ml/github-copilot/meet-the-github-mcp-registry-the-fastest-way-to-discover-mcp-servers/), [MCPdb](https://mcpdb.org/), [Awesome MCP](https://mcpservers.org/))
-- No unified way to browse and install
-- Hard to know which servers work with which agents
-- No ratings/reviews in most registries
+```
+┌─────────────────┐                              ┌──────────────────┐
+│  AI Client      │   MCP JSON-RPC over HTTP     │  MCP Hub Gateway │
+│  (Cursor, etc.) │ ◄──────────────────────────► │                  │
+└─────────────────┘                              │  • Aggregation   │
+                                                 │  • Caching       │
+                                                 │  • Resilience    │
+                                                 │  • Monitoring    │
+                                                 │  • Dashboard     │
+                                                 └────────┬─────────┘
+                          ┌──────────────────────────────┼──────────────────────────────┐
+                          ▼                              ▼                              ▼
+                  ┌───────────────┐              ┌───────────────┐              ┌───────────────┐
+                  │ MCP Server A  │              │ MCP Server B  │              │ MCP Server C  │
+                  │ (e.g. GitHub) │              │ (e.g. Postgres)│              │ (e.g. Files)  │
+                  └───────────────┘              └───────────────┘              └───────────────┘
+```
 
-### 5. **Setup Time & Friction**
-- Manual TOML/JSON editing is error-prone
-- [Cursor UI bugs](https://github.com/cursor/cursor/issues/2944): "+Add new global MCP server" doesn't work, shows file editor instead
-- Slow iteration: 40+ minutes and 50+ tool calls for simple setups
-- No automated testing of configuration
+## What's Completed
 
-### 6. **Security Blindspots**
-- [Missing security controls in Windsurf](https://embracethered.com/blog/posts/2025/windsurf-dangers-lack-of-security-controls-for-mcp-server-tool-invocation/) for MCP tool invocation
-- Automatic tool execution without approval
-- No clear visibility into what permissions MCP servers need
+### Gateway Core (Phase 1 + Phase 3)
 
----
+- **Multi-upstream aggregation** — Connects to multiple MCP servers via stdio, merges their `tools/list` responses, and routes `tools/call` to the correct server using a `serverName/toolName` prefix scheme.
+- **TTL cache** — Caches `tools/list` per upstream with configurable TTL (default 60s) so repeated requests don't hit upstream servers.
+- **Resilience layer** — Per-upstream circuit breakers, configurable retry with exponential backoff, and per-call timeouts to prevent cascading failures.
+- **Protocol fixer** — Auto-restarts crashed stdio servers with exponential backoff, normalizes cryptic MCP errors into clear actionable messages, and validates tool schemas on first fetch (logging warnings for missing descriptions, bad types, etc.).
+- **Usage monitoring** — Tracks per-server and per-tool metrics (call count, success/failure, average latency, token overhead estimates). Detects dead tools (registered but never called) and error-prone tools. Persists stats to `~/.mcphub/usage.json`.
+- **Configuration** — Supports multi-upstream JSON config with Zod validation, plus legacy single-upstream format. Loads from file, env vars, or defaults. Runtime config changes are persisted.
 
-## Proposed Solution: "MCP Hub" CLI Tool
+### Management Dashboard
 
-A universal CLI tool that abstracts away the complexity of MCP management across all coding agents.
+- **React SPA** served directly by the gateway at `/dashboard`.
+- **Overview tab** — Server status, circuit breaker states, tool counts, token overhead, top tools at a glance.
+- **Servers tab** — Add/remove/toggle/restart upstream servers. Browse and add servers from the MCP server registry (powered by [mcpradar.com](https://mcpradar.com)), or add manually.
+- **Tools tab** — Search and browse all merged tools across all servers.
+- **Playground tab** — Select any tool, fill in arguments, execute it, and see the response — all from the browser.
+- **Stats tab** — Token overhead per server (with bar chart), dead tool report, error-prone tool report, wasted token percentage.
 
-### Core Value Proposition
+### REST API
 
-**Before (Current State):**
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | POST | MCP JSON-RPC endpoint (single or batch) |
+| `/health` | GET | Gateway health, upstream status, circuit states |
+| `/stats` | GET | Usage statistics and analysis |
+| `/api/upstreams` | GET | List all upstream servers with details |
+| `/api/upstreams` | POST | Add a new upstream server |
+| `/api/upstreams/:name` | DELETE | Remove an upstream server |
+| `/api/upstreams/:name/toggle` | POST | Enable/disable an upstream |
+| `/api/upstreams/:name/restart` | POST | Restart an upstream server |
+| `/api/tools` | GET | List all merged tools |
+| `/api/tools/call` | POST | Call a tool by name |
+| `/api/registry/search` | GET | Search the MCP server registry |
+
+## What's Remaining
+
+### Phase 2 — Token-Aware Compression & Budget Cap
+
+- [ ] **Description compressor** — Automatically shorten verbose tool/parameter descriptions to reduce token overhead (rule-based and optional LLM pass).
+- [ ] **Token budget cap** — Configurable `max_tool_list_tokens` setting; when the aggregated tool list exceeds the budget, truncate or drop tools by priority.
+- [ ] **Compression pipeline** — Per-upstream and global compression stages before returning `tools/list` to the client.
+
+### Phase 4 — Tool Consolidation & Security
+
+- [ ] **Tool consolidation** — Map N similar upstream tools to 1 gateway tool with a `provider` parameter (e.g. `web_search(provider="tavily"|"brave")`), routing internally.
+- [ ] **Authentication & authorization** — API key or OAuth at the gateway, per-tool or per-server allowlists per client/tenant.
+- [ ] **Per-tool approval flows** — Require manual approval for sensitive tool executions.
+
+### Phase 5 — Observability & Validation
+
+- [ ] **Doctor endpoint** — Validate all upstreams, report reachability, and estimate token usage per server.
+- [ ] **Metrics export** — Token size of responses, cache hit rate, latency per upstream (Prometheus/OpenTelemetry compatible).
+- [ ] **Discovery API** — Expose available servers and tool counts for external tooling.
+
+### CLI Tool (MCP Hub CLI)
+
+- [ ] **Universal agent support** — `mcphub add <server> --agent cursor|windsurf|cline|codex|all` to install servers across all agents.
+- [ ] **Unified registry search** — `mcphub search`, `mcphub browse`, `mcphub info` across all major registries.
+- [ ] **Dependency management** — Auto-detect and install npx/uvx/Docker prerequisites.
+- [ ] **Config validation** — `mcphub validate` and `mcphub doctor` to check configs before runtime.
+- [ ] **Cross-agent sync** — `mcphub sync cursor windsurf` to replicate configs between agents.
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js** >= 18
+- **npm**
+
+### Install Dependencies
+
 ```bash
-# User wants to add GitHub MCP server to Cursor
-1. Google "how to add MCP server to Cursor"
-2. Find ~/.cursor/mcp.json location
-3. Manually edit JSON with correct syntax
-4. Hope npx is installed
-5. Restart Cursor
-6. Debug cryptic errors
-⏱️ Time: 30-60 minutes
+# Install gateway dependencies
+cd gateway
+npm install
+
+# Install dashboard dependencies
+cd dashboard
+npm install
+cd ..
 ```
 
-**After (With MCP Hub):**
+### Configure
+
+Copy the example config and edit it with your upstream MCP servers:
+
 ```bash
-$ mcphub add github --agent cursor
-✓ Detected Cursor installation
-✓ Verified npx is installed
-✓ Downloaded GitHub MCP server config
-✓ Validated configuration
-✓ Added to ~/.cursor/mcp.json
-✓ Ready to use!
-⏱️ Time: 30 seconds
+cp config.example.json config.json
 ```
 
----
+Edit `config.json`:
 
-## Key Features
+```json
+{
+  "port": 3010,
+  "cacheTtlSeconds": 60,
+  "resilience": {
+    "timeoutMs": 10000,
+    "maxRetries": 2,
+    "circuitBreakerThreshold": 5,
+    "circuitBreakerResetMs": 30000
+  },
+  "upstreams": [
+    {
+      "name": "github",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_..."
+      }
+    },
+    {
+      "name": "filesystem",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/dir"]
+    }
+  ]
+}
+```
 
-### 1. Universal Agent Support
+You can also configure via environment variables:
+
 ```bash
-# Works across all major coding agents
-mcphub add <server> --agent cursor
-mcphub add <server> --agent windsurf
-mcphub add <server> --agent cline
-mcphub add <server> --agent vscode
-mcphub add <server> --agent codex
-mcphub add <server> --agent all  # Add to all installed agents
+export MCP_GATEWAY_PORT=3010
+export MCP_GATEWAY_UPSTREAM_COMMAND=npx
+export MCP_GATEWAY_UPSTREAM_ARGS="-y,@modelcontextprotocol/server-everything"
 ```
 
-### 2. Unified Discovery & Search
+Or point to a config file:
+
 ```bash
-# Search across all MCP registries at once
-mcphub search github
-mcphub search "database" --category data
-mcphub browse --popular
-mcphub info eslint  # Show details, reviews, compatibility
+export MCP_GATEWAY_CONFIG=/path/to/config.json
 ```
 
-Integrates with:
-- [GitHub MCP Registry](https://github.blog/ai-and-ml/github-copilot/meet-the-github-mcp-registry-the-fastest-way-to-discover-mcp-servers/)
-- [MCP.so](https://mcp.so/) (17,000+ servers)
-- [MCPdb](https://mcpdb.org/) (10,000+ servers)
-- [Awesome MCP Servers](https://mcpservers.org/)
-- [Cline MCP Marketplace](https://github.com/cline/mcp-marketplace)
+### Build & Run
 
-### 3. Automatic Dependency Management
 ```bash
-# Automatically checks and installs prerequisites
-$ mcphub add postgres
-⚠️  uvx not found (required for Python-based servers)
-? Install uv now? (Y/n) Y
-✓ Installing uv...
-✓ uvx is now available
-✓ Adding postgres MCP server...
+# Build everything (gateway + dashboard)
+npm run build:all
+
+# Start the gateway
+npm start
 ```
 
-Handles:
-- [npx/uvx detection and installation](https://dev.to/leomarsh/mcp-server-executables-explained-npx-uvx-docker-and-beyond-1i1n)
-- Node.js/Python version compatibility
-- Docker-based MCP servers
+The gateway will be available at:
 
-### 4. Configuration Validation
+- `http://localhost:3010/` — MCP JSON-RPC endpoint
+- `http://localhost:3010/dashboard` — Management dashboard
+- `http://localhost:3010/health` — Health check
+
+### Development Mode
+
 ```bash
-# Test configuration before agent restart
-$ mcphub validate
-✓ Cursor config: Valid (3 servers)
-✓ Windsurf config: Valid (2 servers)
-⚠️ Codex config: Syntax error in TOML line 12
-✗ GitHub server: npx command failed (Node.js not found)
+# Run gateway with hot reload (no build step needed)
+npm run dev
 
-$ mcphub doctor  # Diagnose all issues
+# In a separate terminal, run dashboard dev server
+cd dashboard
+npm run dev
 ```
 
-### 5. Simplified Management
-```bash
-$ mcphub list                 # Show all installed servers
-$ mcphub list --agent cursor  # Show Cursor's servers only
-$ mcphub remove github        # Remove from all agents
-$ mcphub enable github --agent windsurf
-$ mcphub disable github --agent windsurf
-$ mcphub sync cursor windsurf  # Sync config from Cursor to Windsurf
+### Point Your AI Agent at the Gateway
+
+Configure your agent to use the gateway as its MCP server. For example, in Cursor's `mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "hub": {
+      "url": "http://localhost:3010/"
+    }
+  }
+}
 ```
 
-### 6. Security Controls
-```bash
-$ mcphub add github --approval required  # Require manual approval
-$ mcphub permissions github              # Show what GitHub server can access
-$ mcphub audit                           # Security audit of all servers
-```
+Now your agent talks to one endpoint and gets tools from all your configured upstream servers.
 
----
-
-## Technical Architecture
-
-### High-Level Design
+## Project Structure
 
 ```
-MCP Hub CLI
-    ↓
-Registry Aggregator (unified search across all marketplaces)
-    ↓
-Agent Adapter Layer (translates to agent-specific formats)
-    ├─ Cursor Adapter (~/.cursor/mcp.json)
-    ├─ Windsurf Adapter (~/.codeium/windsurf/mcp_config.json)
-    ├─ Codex Adapter (~/.codex/config.toml)
-    ├─ VS Code Adapter (settings.json)
-    └─ Claude Desktop Adapter
-    ↓
-Dependency Manager (npx, uvx, Docker checks)
-    ↓
-Validation Engine (test configs before applying)
+mcphub/
+├── README.md                        # This file
+├── docs/
+│   └── MCP_API_GATEWAY_PLAN.md      # Detailed technical plan
+├── gateway/
+│   ├── package.json                 # Gateway dependencies
+│   ├── tsconfig.json                # TypeScript config
+│   ├── config.example.json          # Example configuration
+│   ├── src/
+│   │   ├── index.ts                 # Express server, REST API, entry point
+│   │   ├── config.ts                # Config loading & validation (Zod)
+│   │   ├── proxy.ts                 # Upstream MCP client management
+│   │   ├── aggregate.ts             # Multi-server aggregation & routing
+│   │   ├── resilience.ts            # Circuit breaker, retries, timeouts
+│   │   ├── cache.ts                 # TTL cache for tools/list
+│   │   ├── monitor.ts               # Usage stats, token estimation, dead tool detection
+│   │   └── fixer.ts                 # Auto-restart, error normalization, schema validation
+│   └── dashboard/
+│       ├── package.json             # Dashboard dependencies
+│       ├── vite.config.ts           # Vite build config
+│       └── src/
+│           ├── App.tsx              # Main dashboard UI
+│           ├── api.ts               # React Query hooks & API client
+│           ├── ServerSearch.tsx      # Registry search component
+│           ├── main.tsx             # React entry point
+│           └── index.css            # Tailwind styles
 ```
----
+
+## License
+
+MIT

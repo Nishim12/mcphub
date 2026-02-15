@@ -57,36 +57,4 @@ export class Cache<T = unknown> {
     });
   }
 
-  /** Invalidate a specific key. */
-  invalidate(key: string): void {
-    this.store.delete(key);
-  }
-
-  /** Invalidate all entries. */
-  clear(): void {
-    this.store.clear();
-  }
-
-  /** Remove expired entries (housekeeping). */
-  prune(): number {
-    const now = Date.now();
-    let pruned = 0;
-    for (const [key, entry] of this.store) {
-      if (now > entry.expiresAt) {
-        this.store.delete(key);
-        pruned++;
-      }
-    }
-    return pruned;
-  }
-
-  /** Current number of entries (including expired). */
-  get size(): number {
-    return this.store.size;
-  }
-
-  /** Whether caching is enabled (TTL > 0). */
-  get enabled(): boolean {
-    return this.ttlMs > 0;
-  }
 }

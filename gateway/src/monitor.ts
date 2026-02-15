@@ -19,7 +19,7 @@ import { homedir } from "node:os";
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
-export type ToolStats = {
+type ToolStats = {
   /** Total number of calls */
   calls: number;
   /** Number of successful calls */
@@ -32,7 +32,7 @@ export type ToolStats = {
   lastCalledAt: string | null;
 };
 
-export type ServerStats = {
+type ServerStats = {
   /** Per-tool stats keyed by tool name (without prefix) */
   tools: Record<string, ToolStats>;
   /** Estimated tokens consumed by this server's tools in tools/list */
@@ -41,7 +41,7 @@ export type ServerStats = {
   toolCount: number;
 };
 
-export type UsageData = {
+type UsageData = {
   /** Per-server stats keyed by server name */
   servers: Record<string, ServerStats>;
   /** Recent tool call sequences (last N sessions/calls for pattern detection) */
@@ -60,14 +60,14 @@ export type UsageData = {
  * Fast token estimator: ~4 chars per token (GPT-family heuristic).
  * Good enough for budget/display purposes without external deps.
  */
-export function estimateTokens(text: string): number {
+function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
 }
 
 /**
  * Estimate tokens for a tool definition (name + description + schema).
  */
-export function estimateToolTokens(tool: {
+function estimateToolTokens(tool: {
   name: string;
   description?: string;
   inputSchema?: unknown;
@@ -327,7 +327,7 @@ export class UsageMonitor {
 /*  Analysis types                                                     */
 /* ------------------------------------------------------------------ */
 
-export type UsageAnalysis = {
+type UsageAnalysis = {
   totalTokens: number;
   wastedTokens: number;
   wastedPercent: number;

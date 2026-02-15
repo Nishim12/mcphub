@@ -102,7 +102,7 @@ const ConfigSchema = z
     };
   });
 
-export type ResilienceConfig = z.infer<typeof ResilienceSchema>;
+type ResilienceConfig = z.infer<typeof ResilienceSchema>;
 
 export type GatewayConfig = {
   port: number;

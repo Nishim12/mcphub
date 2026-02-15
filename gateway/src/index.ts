@@ -6,7 +6,7 @@
  * correct server, and exposes a management dashboard + REST API.
  */
 
-import { readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
@@ -311,28 +311,69 @@ async function main() {
   });
 
   /* ================================================================ */
-  /*  Dashboard                                                       */
+  /*  MCP Server Registry (powered by MCP Radar)                      */
   /* ================================================================ */
-  app.get("/dashboard", (_req, res) => {
-    // In dev (tsx), __dirname is the src folder. In prod, it's dist.
-    // Try src first, then fall back to same dir.
-    const candidates = [
-      resolve(__dirname, "dashboard.html"),
-      resolve(__dirname, "..", "src", "dashboard.html"),
-    ];
 
-    for (const path of candidates) {
-      try {
-        const html = readFileSync(path, "utf-8");
-        res.type("html").send(html);
+  /** Search for MCP servers in the online registry */
+  app.get("/api/registry/search", async (req, res) => {
+    const q = (req.query.q as string) || "";
+    const page = parseInt(req.query.page as string, 10) || 1;
+    const perPage = Math.min(parseInt(req.query.per_page as string, 10) || 20, 128);
+    const tags = (req.query.tags as string) || "";
+    const sort = (req.query.sort as string) || "trending";
+
+    const params = new URLSearchParams({
+      q,
+      page: String(page),
+      per_page: String(perPage),
+      sort,
+      order: "desc",
+    });
+    if (tags) params.set("tags", tags);
+
+    try {
+      const response = await fetch(
+        `https://mcpradar.com/api/v1/mcp-servers/search?${params.toString()}`
+      );
+      if (!response.ok) {
+        res.status(response.status).json({
+          error: `Registry API returned ${response.status}`,
+        });
         return;
-      } catch {
-        // try next
       }
+      const data = await response.json();
+      res.json(data);
+    } catch (err) {
+      console.error("Registry search error:", err);
+      res.status(502).json({
+        error: "Failed to reach MCP server registry",
+        details: err instanceof Error ? err.message : String(err),
+      });
     }
-
-    res.status(500).send("Dashboard HTML not found");
   });
+
+  /* ================================================================ */
+  /*  Dashboard (React SPA)                                           */
+  /* ================================================================ */
+  const dashboardDist = [
+    resolve(__dirname, "..", "dashboard", "dist"),
+    resolve(__dirname, "..", "..", "dashboard", "dist"),
+  ].find((p) => existsSync(resolve(p, "index.html")));
+
+  if (dashboardDist) {
+    console.log(`  [dashboard] Serving React SPA from ${dashboardDist}`);
+    app.use("/dashboard/assets", express.static(resolve(dashboardDist, "assets")));
+    app.get("/dashboard", (_req, res) => {
+      res.sendFile(resolve(dashboardDist, "index.html"));
+    });
+    app.get(/^\/dashboard\/.+/, (_req, res) => {
+      res.sendFile(resolve(dashboardDist, "index.html"));
+    });
+  } else {
+    app.get("/dashboard", (_req, res) => {
+      res.status(500).send("Dashboard not built. Run: cd dashboard && npm run build");
+    });
+  }
 
   /* ================================================================ */
   /*  Start server                                                    */
@@ -345,6 +386,7 @@ async function main() {
     console.log(`  GET  /stats     - Usage stats & insights`);
     console.log(`  GET  /dashboard - Management dashboard`);
     console.log(`  /api/*          - Management REST API`);
+    console.log(`  /api/registry/* - MCP Server Registry (search)`);
   });
 
   /* ---- Graceful shutdown ---- */

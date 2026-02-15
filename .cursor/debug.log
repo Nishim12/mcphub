@@ -1,0 +1,147 @@
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"","qLen":0,"enabled":false},"timestamp":1771134397176,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:debounce","message":"debounce effect","data":{"query":"","willSetDebouncedQ":""},"timestamp":1771134397183,"hypothesisId":"H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":0,"serversLen":0,"isFetching":false},"timestamp":1771134397182,"hypothesisId":"H4"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"","debouncedQ":"","isFetching":false,"dataExists":false},"timestamp":1771134397177,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":0,"serversLen":0,"isFetching":false},"timestamp":1771134397177,"hypothesisId":"H4"}
+{"location":"ServerSearch.tsx:debounce","message":"debounce effect","data":{"query":"","willSetDebouncedQ":""},"timestamp":1771134397180,"hypothesisId":"H5"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"","qLen":0,"enabled":false},"timestamp":1771134397181,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"","debouncedQ":"","isFetching":false,"dataExists":false},"timestamp":1771134397181,"hypothesisId":"H3,H5"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"","qLen":0,"enabled":false},"timestamp":1771134397889,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"d","debouncedQ":"","isFetching":false,"dataExists":false},"timestamp":1771134397890,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":1,"serversLen":0,"isFetching":false},"timestamp":1771134397890,"hypothesisId":"H4"}
+{"location":"ServerSearch.tsx:debounce","message":"debounce effect","data":{"query":"d","willSetDebouncedQ":"d"},"timestamp":1771134397891,"hypothesisId":"H5"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"","qLen":0,"enabled":false},"timestamp":1771134397894,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"d","debouncedQ":"","isFetching":false,"dataExists":false},"timestamp":1771134397894,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":1,"serversLen":0,"isFetching":false},"timestamp":1771134397894,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"d","qLen":1,"enabled":false},"timestamp":1771134398193,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"d","debouncedQ":"d","isFetching":false,"dataExists":false},"timestamp":1771134398194,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":1,"serversLen":0,"isFetching":false},"timestamp":1771134398195,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"","qLen":0,"enabled":false},"timestamp":1771134403165,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"","debouncedQ":"","isFetching":false,"dataExists":false},"timestamp":1771134403166,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":0,"serversLen":0,"isFetching":false},"timestamp":1771134403166,"hypothesisId":"H4"}
+{"location":"ServerSearch.tsx:debounce","message":"debounce effect","data":{"query":"","willSetDebouncedQ":""},"timestamp":1771134403169,"hypothesisId":"H5"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"","qLen":0,"enabled":false},"timestamp":1771134404351,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"s","debouncedQ":"","isFetching":false,"dataExists":false},"timestamp":1771134404352,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":1,"serversLen":0,"isFetching":false},"timestamp":1771134404352,"hypothesisId":"H4"}
+{"location":"ServerSearch.tsx:debounce","message":"debounce effect","data":{"query":"s","willSetDebouncedQ":"s"},"timestamp":1771134404353,"hypothesisId":"H5"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"","qLen":0,"enabled":false},"timestamp":1771134404356,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"s","debouncedQ":"","isFetching":false,"dataExists":false},"timestamp":1771134404356,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":1,"serversLen":0,"isFetching":false},"timestamp":1771134404356,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"s","qLen":1,"enabled":false},"timestamp":1771134404655,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"s","debouncedQ":"s","isFetching":false,"dataExists":false},"timestamp":1771134404656,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":1,"serversLen":0,"isFetching":false},"timestamp":1771134404657,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"s","qLen":1,"enabled":false},"timestamp":1771134418374,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"s","isFetching":false,"dataExists":false},"timestamp":1771134418375,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"empty","queryLen":2,"serversLen":0,"isFetching":false},"timestamp":1771134418375,"hypothesisId":"H4"}
+{"location":"ServerSearch.tsx:debounce","message":"debounce effect","data":{"query":"ss","willSetDebouncedQ":"ss"},"timestamp":1771134418375,"hypothesisId":"H5"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134418676,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":true,"dataExists":false},"timestamp":1771134418677,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":0,"isFetching":true},"timestamp":1771134418678,"hypothesisId":"H4"}
+{"location":"api.ts:queryFn","message":"fetching registry","data":{"url":"/api/registry/search?q=ss&per_page=20&sort=trending","q":"ss"},"timestamp":1771134418681,"hypothesisId":"H1"}
+{"location":"api.ts:queryFn:result","message":"registry response","data":{"status":200,"listLen":20,"totalCount":212,"hasError":false},"timestamp":1771134420138,"hypothesisId":"H1"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134420139,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134420139,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134420139,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134420146,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134420146,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134420146,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134421031,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134421032,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134421032,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134421324,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134421325,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134421325,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134421348,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134421349,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134421349,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134421364,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134421365,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134421365,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134421373,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134421374,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134421374,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134422372,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134422372,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134422372,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134423347,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134423348,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134423348,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134424281,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134424282,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134424282,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134424655,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134424655,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134424655,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134424865,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134424865,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134424866,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134425458,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134425459,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134425459,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134425481,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134425481,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134425481,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"ss","qLen":2,"enabled":true},"timestamp":1771134425514,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"ss","debouncedQ":"ss","isFetching":false,"dataExists":true,"listLen":20,"totalCount":212},"timestamp":1771134425515,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134425515,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"","qLen":0,"enabled":false},"timestamp":1771134425995,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"","debouncedQ":"","isFetching":false,"dataExists":false},"timestamp":1771134425995,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":0,"serversLen":0,"isFetching":false},"timestamp":1771134425995,"hypothesisId":"H4"}
+{"location":"ServerSearch.tsx:debounce","message":"debounce effect","data":{"query":"","willSetDebouncedQ":""},"timestamp":1771134425998,"hypothesisId":"H5"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"","qLen":0,"enabled":false},"timestamp":1771134425998,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"","debouncedQ":"","isFetching":false,"dataExists":false},"timestamp":1771134425998,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":0,"serversLen":0,"isFetching":false},"timestamp":1771134425999,"hypothesisId":"H4"}
+{"location":"ServerSearch.tsx:debounce","message":"debounce effect","data":{"query":"","willSetDebouncedQ":""},"timestamp":1771134425999,"hypothesisId":"H5"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"","qLen":0,"enabled":false},"timestamp":1771134433365,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"a","debouncedQ":"","isFetching":false,"dataExists":false},"timestamp":1771134433369,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":1,"serversLen":0,"isFetching":false},"timestamp":1771134433369,"hypothesisId":"H4"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"a","debouncedQ":"","isFetching":false,"dataExists":false},"timestamp":1771134433366,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":1,"serversLen":0,"isFetching":false},"timestamp":1771134433366,"hypothesisId":"H4"}
+{"location":"ServerSearch.tsx:debounce","message":"debounce effect","data":{"query":"a","willSetDebouncedQ":"a"},"timestamp":1771134433367,"hypothesisId":"H5"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"","qLen":0,"enabled":false},"timestamp":1771134433369,"hypothesisId":"H2"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"a","qLen":1,"enabled":false},"timestamp":1771134433668,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"a","debouncedQ":"a","isFetching":false,"dataExists":false},"timestamp":1771134433669,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":1,"serversLen":0,"isFetching":false},"timestamp":1771134433670,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"a","qLen":1,"enabled":false},"timestamp":1771134433703,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"as","debouncedQ":"a","isFetching":false,"dataExists":false},"timestamp":1771134433704,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"empty","queryLen":2,"serversLen":0,"isFetching":false},"timestamp":1771134433704,"hypothesisId":"H4"}
+{"location":"ServerSearch.tsx:debounce","message":"debounce effect","data":{"query":"as","willSetDebouncedQ":"as"},"timestamp":1771134433705,"hypothesisId":"H5"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"as","qLen":2,"enabled":true},"timestamp":1771134434007,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"as","debouncedQ":"as","isFetching":true,"dataExists":false},"timestamp":1771134434008,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":0,"isFetching":true},"timestamp":1771134434008,"hypothesisId":"H4"}
+{"location":"api.ts:queryFn","message":"fetching registry","data":{"url":"/api/registry/search?q=as&per_page=20&sort=trending","q":"as"},"timestamp":1771134434009,"hypothesisId":"H1"}
+{"location":"api.ts:queryFn:result","message":"registry response","data":{"status":200,"listLen":20,"totalCount":267,"hasError":false},"timestamp":1771134435228,"hypothesisId":"H1"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"as","qLen":2,"enabled":true},"timestamp":1771134435229,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"as","debouncedQ":"as","isFetching":false,"dataExists":true,"listLen":20,"totalCount":267},"timestamp":1771134435229,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134435230,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"as","qLen":2,"enabled":true},"timestamp":1771134435245,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"as","debouncedQ":"as","isFetching":false,"dataExists":true,"listLen":20,"totalCount":267},"timestamp":1771134435245,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134435245,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"as","qLen":2,"enabled":true},"timestamp":1771134435694,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"as","debouncedQ":"as","isFetching":false,"dataExists":true,"listLen":20,"totalCount":267},"timestamp":1771134435694,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134435694,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"as","qLen":2,"enabled":true},"timestamp":1771134435773,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"as","debouncedQ":"as","isFetching":false,"dataExists":true,"listLen":20,"totalCount":267},"timestamp":1771134435774,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134435774,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"as","qLen":2,"enabled":true},"timestamp":1771134437109,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"as","debouncedQ":"as","isFetching":false,"dataExists":true,"listLen":20,"totalCount":267},"timestamp":1771134437110,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134437110,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"as","qLen":2,"enabled":true},"timestamp":1771134437159,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"as","debouncedQ":"as","isFetching":false,"dataExists":true,"listLen":20,"totalCount":267},"timestamp":1771134437160,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134437160,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"as","qLen":2,"enabled":true},"timestamp":1771134438566,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"as","debouncedQ":"as","isFetching":false,"dataExists":true,"listLen":20,"totalCount":267},"timestamp":1771134438566,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134438567,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"as","qLen":2,"enabled":true},"timestamp":1771134438601,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"as","debouncedQ":"as","isFetching":false,"dataExists":true,"listLen":20,"totalCount":267},"timestamp":1771134438601,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"results","queryLen":2,"serversLen":20,"isFetching":false},"timestamp":1771134438601,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"as","qLen":2,"enabled":true},"timestamp":1771134440813,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"","debouncedQ":"as","isFetching":false,"dataExists":true,"listLen":20,"totalCount":267},"timestamp":1771134440814,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":0,"serversLen":20,"isFetching":false},"timestamp":1771134440814,"hypothesisId":"H4"}
+{"location":"ServerSearch.tsx:debounce","message":"debounce effect","data":{"query":"","willSetDebouncedQ":""},"timestamp":1771134440817,"hypothesisId":"H5"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"","qLen":0,"enabled":false},"timestamp":1771134441119,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"","debouncedQ":"","isFetching":false,"dataExists":false},"timestamp":1771134441120,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":0,"serversLen":0,"isFetching":false},"timestamp":1771134441121,"hypothesisId":"H4"}
+{"location":"api.ts:useRegistrySearch","message":"hook called","data":{"q":"","qLen":0,"enabled":false},"timestamp":1771134441124,"hypothesisId":"H2"}
+{"location":"ServerSearch.tsx:render","message":"component render","data":{"query":"","debouncedQ":"","isFetching":false,"dataExists":false},"timestamp":1771134441124,"hypothesisId":"H3,H5"}
+{"location":"ServerSearch.tsx:renderBranch","message":"render branch decision","data":{"renderBranch":"placeholder","queryLen":0,"serversLen":0,"isFetching":false},"timestamp":1771134441125,"hypothesisId":"H4"}

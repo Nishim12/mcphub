@@ -20,13 +20,13 @@ import { homedir } from "node:os";
  * Fast token estimator: ~4 chars per token (GPT-family heuristic).
  * Good enough for budget/display purposes without external deps.
  */
-export function estimateTokens(text) {
+function estimateTokens(text) {
     return Math.ceil(text.length / 4);
 }
 /**
  * Estimate tokens for a tool definition (name + description + schema).
  */
-export function estimateToolTokens(tool) {
+function estimateToolTokens(tool) {
     let text = tool.name;
     if (tool.description)
         text += " " + tool.description;

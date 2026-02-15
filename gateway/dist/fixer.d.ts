@@ -20,20 +20,10 @@ type SchemaIssue = {
  */
 export declare function tryRestart(manager: UpstreamManager, config: UpstreamConfig): Promise<boolean>;
 /**
- * Reset restart counter for a server (e.g. after a period of healthy operation).
- */
-export declare function resetRestartCount(name: string): void;
-/**
  * Wrap an upstream call with error normalization.
  * Catches common failure patterns and returns clear, actionable errors.
  */
 export declare function withErrorNormalization<T>(serverName: string, operation: string, fn: () => Promise<T>): Promise<T>;
-export declare class NormalizedError extends Error {
-    readonly serverName: string;
-    readonly operation: string;
-    readonly originalError: unknown;
-    constructor(serverName: string, operation: string, originalError: unknown);
-}
 type Tool = {
     name: string;
     description?: string;

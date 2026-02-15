@@ -44,7 +44,7 @@ declare const ResilienceSchema: z.ZodObject<{
     circuitBreakerThreshold?: number | undefined;
     circuitBreakerResetMs?: number | undefined;
 }>;
-export type ResilienceConfig = z.infer<typeof ResilienceSchema>;
+type ResilienceConfig = z.infer<typeof ResilienceSchema>;
 export type GatewayConfig = {
     port: number;
     cacheTtlSeconds: number;

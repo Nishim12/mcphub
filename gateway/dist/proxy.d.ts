@@ -21,7 +21,7 @@ export type JsonRpcResponse = {
         data?: unknown;
     };
 };
-export type UpstreamStatus = "connected" | "disconnected" | "error" | "disabled";
+type UpstreamStatus = "connected" | "disconnected" | "error" | "disabled";
 export type UpstreamState = {
     config: UpstreamConfig;
     client: Client;
@@ -60,3 +60,4 @@ export declare class UpstreamManager {
         enabled: boolean;
     } | null>;
 }
+export {};

@@ -412,6 +412,7 @@ async function handleToolsCall(
         `${parsed.serverName}/tools/call(${parsed.toolName})`
       )
     );
+
     endCall?.(true);
     return { jsonrpc: "2.0", id, result: response };
   } catch (err) {

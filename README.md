@@ -99,6 +99,8 @@ MCP Hub solves these by acting as a single MCP endpoint that aggregates, optimiz
 
 ## Getting Started
 
+> **Important:** All commands below are run from the `gateway/` directory. There is no `package.json` at the repo root.
+
 ### Prerequisites
 
 - **Node.js** >= 18
@@ -107,8 +109,9 @@ MCP Hub solves these by acting as a single MCP endpoint that aggregates, optimiz
 ### Install Dependencies
 
 ```bash
-# Install gateway dependencies
 cd gateway
+
+# Install gateway dependencies
 npm install
 
 # Install dashboard dependencies
@@ -122,6 +125,7 @@ cd ..
 Copy the example config and edit it with your upstream MCP servers:
 
 ```bash
+# From the gateway/ directory
 cp config.example.json config.json
 ```
 

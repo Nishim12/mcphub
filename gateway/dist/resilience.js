@@ -119,11 +119,6 @@ export class CircuitBreaker {
         }
         return { state: this.state, failures: this.failureCount };
     }
-    /** Manually reset the circuit breaker. */
-    reset() {
-        this.state = "closed";
-        this.failureCount = 0;
-    }
 }
 /* ------------------------------------------------------------------ */
 /*  Utilities                                                          */

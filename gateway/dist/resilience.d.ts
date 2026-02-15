@@ -8,7 +8,7 @@
  * Wrap a promise with a timeout. Rejects with a clear error on expiry.
  */
 export declare function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number, label: string): Promise<T>;
-export type RetryOptions = {
+type RetryOptions = {
     /** Max number of retry attempts (0 = no retries). Default: 2 */
     maxRetries?: number;
     /** Base delay between retries in ms. Default: 500 */
@@ -22,7 +22,7 @@ export type RetryOptions = {
  * Retry a function with configurable backoff.
  */
 export declare function withRetry<T>(fn: () => Promise<T>, label: string, options?: RetryOptions): Promise<T>;
-export type CircuitBreakerOptions = {
+type CircuitBreakerOptions = {
     /** Number of consecutive failures to trip the breaker. Default: 5 */
     failureThreshold?: number;
     /** Time in ms to keep the circuit open before trying again. Default: 30000 (30s) */
@@ -49,7 +49,5 @@ export declare class CircuitBreaker {
         state: CircuitState;
         failures: number;
     };
-    /** Manually reset the circuit breaker. */
-    reset(): void;
 }
 export {};

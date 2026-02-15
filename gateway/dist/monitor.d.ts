@@ -10,7 +10,7 @@
  *
  * Persists to ~/.mcphub/usage.json and exposes via GET /stats.
  */
-export type ToolStats = {
+type ToolStats = {
     /** Total number of calls */
     calls: number;
     /** Number of successful calls */
@@ -22,7 +22,7 @@ export type ToolStats = {
     /** Timestamp of last call (ISO string) */
     lastCalledAt: string | null;
 };
-export type ServerStats = {
+type ServerStats = {
     /** Per-tool stats keyed by tool name (without prefix) */
     tools: Record<string, ToolStats>;
     /** Estimated tokens consumed by this server's tools in tools/list */
@@ -30,7 +30,7 @@ export type ServerStats = {
     /** Total tools exposed by this server */
     toolCount: number;
 };
-export type UsageData = {
+type UsageData = {
     /** Per-server stats keyed by server name */
     servers: Record<string, ServerStats>;
     /** Recent tool call sequences (last N sessions/calls for pattern detection) */
@@ -40,19 +40,6 @@ export type UsageData = {
     /** When stats were last saved */
     lastSavedAt: string;
 };
-/**
- * Fast token estimator: ~4 chars per token (GPT-family heuristic).
- * Good enough for budget/display purposes without external deps.
- */
-export declare function estimateTokens(text: string): number;
-/**
- * Estimate tokens for a tool definition (name + description + schema).
- */
-export declare function estimateToolTokens(tool: {
-    name: string;
-    description?: string;
-    inputSchema?: unknown;
-}): number;
 export declare class UsageMonitor {
     private data;
     private currentSequence;
@@ -93,7 +80,7 @@ export declare class UsageMonitor {
      */
     shutdown(): void;
 }
-export type UsageAnalysis = {
+type UsageAnalysis = {
     totalTokens: number;
     wastedTokens: number;
     wastedPercent: number;
@@ -115,3 +102,4 @@ export type UsageAnalysis = {
         failures: number;
     }[];
 };
+export {};

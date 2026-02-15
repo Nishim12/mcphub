@@ -37,12 +37,6 @@ export async function tryRestart(manager, config) {
     restartAttempts.set(config.name, attempts + 1);
     return false;
 }
-/**
- * Reset restart counter for a server (e.g. after a period of healthy operation).
- */
-export function resetRestartCount(name) {
-    restartAttempts.delete(name);
-}
 /* ------------------------------------------------------------------ */
 /*  Error Normalization                                                */
 /* ------------------------------------------------------------------ */
@@ -58,7 +52,7 @@ export async function withErrorNormalization(serverName, operation, fn) {
         throw new NormalizedError(serverName, operation, err);
     }
 }
-export class NormalizedError extends Error {
+class NormalizedError extends Error {
     serverName;
     operation;
     originalError;

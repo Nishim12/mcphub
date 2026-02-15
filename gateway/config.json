@@ -1,0 +1,31 @@
+{
+  "port": 3010,
+  "cacheTtlSeconds": 60,
+  "resilience": {
+    "timeoutMs": 10000,
+    "maxRetries": 2,
+    "circuitBreakerThreshold": 5,
+    "circuitBreakerResetMs": 30000
+  },
+  "upstreams": [
+    {
+      "name": "everything",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-everything"
+      ]
+    },
+    {
+      "name": "firecrawl-mcp-server",
+      "command": "npx",
+      "args": [
+        "-y",
+        "firecrawl-mcp"
+      ],
+      "env": {
+        "FIRECRAWL_API_KEY": "d"
+      }
+    }
+  ]
+}

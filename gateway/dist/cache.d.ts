@@ -22,14 +22,4 @@ export declare class Cache<T = unknown> {
     };
     /** Store a value in the cache. */
     set(key: string, data: T): void;
-    /** Invalidate a specific key. */
-    invalidate(key: string): void;
-    /** Invalidate all entries. */
-    clear(): void;
-    /** Remove expired entries (housekeeping). */
-    prune(): number;
-    /** Current number of entries (including expired). */
-    get size(): number;
-    /** Whether caching is enabled (TTL > 0). */
-    get enabled(): boolean;
 }

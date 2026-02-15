@@ -7,7 +7,7 @@
  * 3. Validate tool schemas on first tools/list and log warnings for issues
  */
 
-import type { UpstreamManager, UpstreamState, JsonRpcResponse } from "./proxy.js";
+import type { UpstreamManager } from "./proxy.js";
 import type { UpstreamConfig } from "./config.js";
 
 /* ------------------------------------------------------------------ */
@@ -69,13 +69,6 @@ export async function tryRestart(
   return false;
 }
 
-/**
- * Reset restart counter for a server (e.g. after a period of healthy operation).
- */
-export function resetRestartCount(name: string): void {
-  restartAttempts.delete(name);
-}
-
 /* ------------------------------------------------------------------ */
 /*  Error Normalization                                                */
 /* ------------------------------------------------------------------ */
@@ -96,7 +89,7 @@ export async function withErrorNormalization<T>(
   }
 }
 
-export class NormalizedError extends Error {
+class NormalizedError extends Error {
   public readonly serverName: string;
   public readonly operation: string;
   public readonly originalError: unknown;

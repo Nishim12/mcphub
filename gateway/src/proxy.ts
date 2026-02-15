@@ -26,7 +26,7 @@ export type JsonRpcResponse = {
   error?: { code: number; message: string; data?: unknown };
 };
 
-export type UpstreamStatus = "connected" | "disconnected" | "error" | "disabled";
+type UpstreamStatus = "connected" | "disconnected" | "error" | "disabled";
 
 export type UpstreamState = {
   config: UpstreamConfig;

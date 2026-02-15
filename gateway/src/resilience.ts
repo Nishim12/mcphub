@@ -38,7 +38,7 @@ export async function withTimeout<T>(
 /*  Retry                                                              */
 /* ------------------------------------------------------------------ */
 
-export type RetryOptions = {
+type RetryOptions = {
   /** Max number of retry attempts (0 = no retries). Default: 2 */
   maxRetries?: number;
   /** Base delay between retries in ms. Default: 500 */
@@ -95,7 +95,7 @@ export async function withRetry<T>(
 /*  Circuit Breaker                                                    */
 /* ------------------------------------------------------------------ */
 
-export type CircuitBreakerOptions = {
+type CircuitBreakerOptions = {
   /** Number of consecutive failures to trip the breaker. Default: 5 */
   failureThreshold?: number;
   /** Time in ms to keep the circuit open before trying again. Default: 30000 (30s) */
@@ -182,11 +182,6 @@ export class CircuitBreaker {
     return { state: this.state, failures: this.failureCount };
   }
 
-  /** Manually reset the circuit breaker. */
-  reset(): void {
-    this.state = "closed";
-    this.failureCount = 0;
-  }
 }
 
 /* ------------------------------------------------------------------ */

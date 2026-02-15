@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MCP Gateway Dashboard</title>
+<style>
+/* ================================================================ */
+/*  Reset & Variables                                                */
+/* ================================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:       #0f1117;
+  --surface:  #181a20;
+  --surface2: #1e2028;
+  --border:   #2a2d38;
+  --text:     #e4e4e7;
+  --text2:    #9ca3af;
+  --accent:   #6366f1;
+  --accent2:  #818cf8;
+  --green:    #22c55e;
+  --red:      #ef4444;
+  --orange:   #f59e0b;
+  --blue:     #3b82f6;
+  --radius:   8px;
+  --mono:     'SF Mono','Cascadia Code','Consolas',monospace;
+}
+html{font-size:14px}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.6;
+  min-height:100vh;
+}
+a{color:var(--accent2);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ================================================================ */
+/*  Layout                                                           */
+/* ================================================================ */
+.app{max-width:1280px;margin:0 auto;padding:1.5rem}
+
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:2rem;flex-wrap:wrap;gap:1rem;
+}
+header h1{font-size:1.4rem;font-weight:700;letter-spacing:-0.02em}
+header h1 span{color:var(--accent2);font-weight:400}
+.meta{display:flex;gap:1.5rem;font-size:.85rem;color:var(--text2)}
+.meta .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
+.meta .dot.ok{background:var(--green)} .meta .dot.err{background:var(--red)}
+
+/* Tabs */
+.tabs{display:flex;gap:.25rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0}
+.tabs button{
+  background:none;border:none;color:var(--text2);padding:.6rem 1rem;cursor:pointer;
+  font-size:.9rem;border-bottom:2px solid transparent;transition:.15s;
+}
+.tabs button:hover{color:var(--text)}
+.tabs button.active{color:var(--accent2);border-bottom-color:var(--accent)}
+.tab-content{display:none} .tab-content.active{display:block}
+
+/* Cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.2rem;
+}
+.card .label{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:.25rem}
+.card .value{font-size:1.8rem;font-weight:700}
+.card .value.green{color:var(--green)} .card .value.red{color:var(--red)}
+.card .value.orange{color:var(--orange)} .card .value.blue{color:var(--blue)}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;padding:.6rem .8rem;color:var(--text2);font-weight:600;border-bottom:1px solid var(--border);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
+td{padding:.6rem .8rem;border-bottom:1px solid var(--border)}
+tr:hover td{background:var(--surface2)}
+
+/* Badges */
+.badge{
+  display:inline-block;padding:.15rem .5rem;border-radius:99px;font-size:.72rem;
+  font-weight:600;letter-spacing:.02em;
+}
+.badge.connected{background:#22c55e22;color:var(--green)}
+.badge.disconnected{background:#ef444422;color:var(--red)}
+.badge.error{background:#ef444422;color:var(--red)}
+.badge.disabled{background:#9ca3af22;color:var(--text2)}
+.badge.closed{background:#22c55e22;color:var(--green)}
+.badge.open{background:#ef444422;color:var(--red)}
+.badge.half-open{background:#f59e0b22;color:var(--orange)}
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.45rem .9rem;border-radius:var(--radius);border:1px solid var(--border);
+  background:var(--surface);color:var(--text);cursor:pointer;font-size:.8rem;
+  transition:.15s;
+}
+.btn:hover{background:var(--surface2);border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent2)}
+.btn.danger{border-color:var(--red);color:var(--red)}
+.btn.danger:hover{background:#ef444422}
+.btn.sm{padding:.3rem .6rem;font-size:.75rem}
+
+/* Toggle switch */
+.toggle{position:relative;width:36px;height:20px;cursor:pointer;display:inline-block;vertical-align:middle}
+.toggle input{opacity:0;width:0;height:0}
+.toggle .slider{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  background:var(--border);border-radius:20px;transition:.2s;
+}
+.toggle .slider::before{
+  content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;
+  background:#fff;border-radius:50%;transition:.2s;
+}
+.toggle input:checked + .slider{background:var(--green)}
+.toggle input:checked + .slider::before{transform:translateX(16px)}
+
+/* Forms */
+.form-row{display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem}
+.form-group{display:flex;flex-direction:column;gap:.25rem}
+.form-group label{font-size:.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em}
+input[type="text"],textarea,select{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:.5rem .7rem;color:var(--text);font-size:.85rem;outline:none;
+  font-family:inherit;
+}
+input[type="text"]:focus,textarea:focus{border-color:var(--accent)}
+textarea{font-family:var(--mono);font-size:.8rem;resize:vertical;min-height:80px}
+
+/* Panel sections */
+.panel{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.2rem;margin-bottom:1.5rem;
+}
+.panel h3{font-size:.95rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.panel h3 .count{
+  background:var(--accent);color:#fff;font-size:.7rem;padding:.1rem .4rem;
+  border-radius:99px;font-weight:600;
+}
+
+/* Code / JSON output */
+.output{
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1rem;font-family:var(--mono);font-size:.8rem;
+  max-height:400px;overflow:auto;white-space:pre-wrap;word-break:break-all;
+  color:var(--text2);
+}
+
+/* Search */
+.search-bar{margin-bottom:1rem}
+.search-bar input{width:100%;max-width:400px}
+
+/* Stat bars */
+.stat-bar{display:flex;align-items:center;gap:.5rem;margin:.3rem 0}
+.stat-bar .bar{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.stat-bar .bar .fill{height:100%;border-radius:3px;background:var(--accent)}
+.stat-bar .stat-label{font-size:.75rem;color:var(--text2);min-width:120px}
+.stat-bar .stat-value{font-size:.75rem;font-weight:600;min-width:50px;text-align:right}
+
+/* Responsive */
+@media(max-width:768px){
+  .app{padding:1rem}
+  .cards{grid-template-columns:1fr 1fr}
+  .form-row{flex-direction:column}
+}
+/* Spinner */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{display:flex;align-items:center;gap:.5rem;color:var(--text2);padding:2rem;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ============================================================ -->
+<!--  Header                                                       -->
+<!-- ============================================================ -->
+<header>
+  <h1>MCP Gateway <span>Dashboard</span></h1>
+  <div class="meta">
+    <span><span class="dot ok" id="statusDot"></span> <span id="statusText">Connecting...</span></span>
+    <span id="uptimeText"></span>
+    <span id="versionText"></span>
+  </div>
+</header>
+
+<!-- ============================================================ -->
+<!--  Tabs                                                         -->
+<!-- ============================================================ -->
+<div class="tabs">
+  <button class="active" data-tab="overview">Overview</button>
+  <button data-tab="servers">Servers</button>
+  <button data-tab="tools">Tools</button>
+  <button data-tab="playground">Playground</button>
+  <button data-tab="stats">Stats</button>
+</div>
+
+<!-- ============================================================ -->
+<!--  Overview Tab                                                 -->
+<!-- ============================================================ -->
+<div class="tab-content active" id="tab-overview">
+  <div class="cards" id="overviewCards">
+    <div class="card"><div class="label">Total Servers</div><div class="value blue" id="ovTotal">-</div></div>
+    <div class="card"><div class="label">Healthy</div><div class="value green" id="ovHealthy">-</div></div>
+    <div class="card"><div class="label">Total Tools</div><div class="value" id="ovTools">-</div></div>
+    <div class="card"><div class="label">Token Overhead</div><div class="value orange" id="ovTokens">-</div></div>
+  </div>
+
+  <div class="panel">
+    <h3>Server Status</h3>
+    <table>
+      <thead><tr><th>Name</th><th>Status</th><th>Circuit</th><th>Tools</th></tr></thead>
+      <tbody id="ovServersBody"></tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h3>Top Tools <span class="count" id="topToolsCount">0</span></h3>
+    <table>
+      <thead><tr><th>Tool</th><th>Server</th><th>Calls</th><th>Avg Latency</th></tr></thead>
+      <tbody id="ovTopToolsBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  Servers Tab                                                  -->
+<!-- ============================================================ -->
+<div class="tab-content" id="tab-servers">
+  <div class="panel">
+    <h3>Add MCP Server</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="addName" placeholder="e.g. github" style="width:140px" />
+      </div>
+      <div class="form-group">
+        <label>Command</label>
+        <input type="text" id="addCommand" placeholder="e.g. npx" style="width:120px" />
+      </div>
+      <div class="form-group" style="flex:1">
+        <label>Args (comma-separated)</label>
+        <input type="text" id="addArgs" placeholder="e.g. -y,@modelcontextprotocol/server-github" />
+      </div>
+      <button class="btn primary" onclick="addServer()">Add Server</button>
+    </div>
+    <div id="addServerMsg" style="font-size:.8rem;margin-top:.25rem"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Configured Servers <span class="count" id="serverCount">0</span></h3>
+    <table>
+      <thead><tr><th>Name</th><th>Command</th><th>Status</th><th>Circuit</th><th>Enabled</th><th>Actions</th></tr></thead>
+      <tbody id="serversBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  Tools Tab                                                    -->
+<!-- ============================================================ -->
+<div class="tab-content" id="tab-tools">
+  <div class="search-bar">
+    <input type="text" id="toolSearch" placeholder="Search tools..." oninput="renderTools()" />
+  </div>
+  <div class="panel">
+    <h3>All Tools <span class="count" id="toolCount">0</span></h3>
+    <table>
+      <thead><tr><th>Name</th><th>Description</th><th>Parameters</th><th>Action</th></tr></thead>
+      <tbody id="toolsBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  Playground Tab                                               -->
+<!-- ============================================================ -->
+<div class="tab-content" id="tab-playground">
+  <div class="panel">
+    <h3>Tool Playground</h3>
+    <div class="form-row">
+      <div class="form-group" style="min-width:250px">
+        <label>Tool</label>
+        <select id="pgTool" onchange="onPlaygroundToolChange()">
+          <option value="">Select a tool...</option>
+        </select>
+      </div>
+      <button class="btn primary" onclick="callTool()">Execute</button>
+    </div>
+    <div id="pgSchema" style="font-size:.8rem;color:var(--text2);margin-bottom:.75rem"></div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Arguments (JSON)</label>
+      <textarea id="pgArgs" placeholder='{"key": "value"}'></textarea>
+    </div>
+    <h3>Response</h3>
+    <div class="output" id="pgOutput">No response yet. Select a tool and click Execute.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  Stats Tab                                                    -->
+<!-- ============================================================ -->
+<div class="tab-content" id="tab-stats">
+  <div class="cards" id="statsCards">
+    <div class="card"><div class="label">Total Tokens</div><div class="value blue" id="stTotal">-</div></div>
+    <div class="card"><div class="label">Wasted Tokens</div><div class="value red" id="stWasted">-</div></div>
+    <div class="card"><div class="label">Waste %</div><div class="value orange" id="stWasteP">-</div></div>
+    <div class="card"><div class="label">Error-Prone Tools</div><div class="value red" id="stErrors">-</div></div>
+  </div>
+
+  <div class="panel">
+    <h3>Dead Tools <span class="count" id="deadCount">0</span></h3>
+    <p style="font-size:.8rem;color:var(--text2);margin-bottom:.75rem">Tools consuming context tokens but never called.</p>
+    <table>
+      <thead><tr><th>Tool</th><th>Server</th><th>Token Cost</th></tr></thead>
+      <tbody id="deadBody"></tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h3>Per-Server Token Overhead</h3>
+    <div id="serverTokenBars"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Error-Prone Tools</h3>
+    <table>
+      <thead><tr><th>Tool</th><th>Server</th><th>Failure Rate</th><th>Failures</th></tr></thead>
+      <tbody id="errorBody"></tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- /.app -->
+
+<!-- ============================================================ -->
+<!--  JavaScript                                                   -->
+<!-- ============================================================ -->
+<script>
+const API = '';  // same origin
+
+// ---- State ----
+let healthData = null;
+let statsData = null;
+let toolsData = [];
+let upstreamsData = [];
+
+// ---- Tabs ----
+document.querySelectorAll('.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ---- Data fetching ----
+async function fetchJSON(url, opts) {
+  const res = await fetch(API + url, opts);
+  return res.json();
+}
+
+async function refreshAll() {
+  try {
+    const [h, s, t, u] = await Promise.all([
+      fetchJSON('/health'),
+      fetchJSON('/stats'),
+      fetchJSON('/api/tools'),
+      fetchJSON('/api/upstreams'),
+    ]);
+    healthData = h; statsData = s; toolsData = t; upstreamsData = u;
+    renderAll();
+  } catch (err) {
+    document.getElementById('statusDot').className = 'dot err';
+    document.getElementById('statusText').textContent = 'Disconnected';
+  }
+}
+
+function renderAll() {
+  renderHeader();
+  renderOverview();
+  renderServers();
+  renderTools();
+  renderPlaygroundSelect();
+  renderStats();
+}
+
+// ---- Header ----
+function renderHeader() {
+  if (!healthData) return;
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  dot.className = healthData.healthy > 0 ? 'dot ok' : 'dot err';
+  txt.textContent = healthData.healthy > 0 ? 'Online' : 'No healthy servers';
+  document.getElementById('versionText').textContent = 'v' + healthData.version;
+  if (healthData.startedAt) {
+    const mins = Math.floor((Date.now() - new Date(healthData.startedAt).getTime()) / 60000);
+    document.getElementById('uptimeText').textContent =
+      mins < 60 ? `Uptime: ${mins}m` : `Uptime: ${Math.floor(mins/60)}h ${mins%60}m`;
+  }
+}
+
+// ---- Overview ----
+function renderOverview() {
+  if (!healthData || !statsData) return;
+  document.getElementById('ovTotal').textContent = healthData.total;
+  document.getElementById('ovHealthy').textContent = healthData.healthy;
+  document.getElementById('ovTools').textContent = toolsData.length;
+  document.getElementById('ovTokens').textContent = (statsData.analysis?.totalTokens ?? 0).toLocaleString();
+
+  // Server status table
+  const tbody = document.getElementById('ovServersBody');
+  tbody.innerHTML = '';
+  for (const u of upstreamsData) {
+    const tools = statsData.servers?.[u.name]?.toolCount ?? '-';
+    const circuit = u.circuit ? u.circuit.state : '-';
+    tbody.innerHTML += `<tr>
+      <td><strong>${esc(u.name)}</strong></td>
+      <td><span class="badge ${u.status}">${u.status}</span></td>
+      <td><span class="badge ${circuit}">${circuit}</span></td>
+      <td>${tools}</td>
+    </tr>`;
+  }
+
+  // Top tools
+  const topTools = statsData.analysis?.topTools ?? [];
+  document.getElementById('topToolsCount').textContent = topTools.length;
+  const topBody = document.getElementById('ovTopToolsBody');
+  topBody.innerHTML = '';
+  for (const t of topTools.slice(0, 10)) {
+    topBody.innerHTML += `<tr>
+      <td><code>${esc(t.tool)}</code></td>
+      <td>${esc(t.server)}</td>
+      <td>${t.calls}</td>
+      <td>${t.avgLatencyMs}ms</td>
+    </tr>`;
+  }
+  if (topTools.length === 0) {
+    topBody.innerHTML = '<tr><td colspan="4" style="color:var(--text2)">No tool calls recorded yet.</td></tr>';
+  }
+}
+
+// ---- Servers ----
+function renderServers() {
+  const tbody = document.getElementById('serversBody');
+  document.getElementById('serverCount').textContent = upstreamsData.length;
+  tbody.innerHTML = '';
+  for (const u of upstreamsData) {
+    const circuit = u.circuit ? u.circuit.state : '-';
+    tbody.innerHTML += `<tr>
+      <td><strong>${esc(u.name)}</strong></td>
+      <td><code style="font-size:.78rem">${esc(u.command)} ${esc((u.args||[]).join(' '))}</code></td>
+      <td><span class="badge ${u.status}">${u.status}</span></td>
+      <td><span class="badge ${circuit}">${circuit}</span></td>
+      <td>
+        <label class="toggle">
+          <input type="checkbox" ${u.enabled ? 'checked' : ''} onchange="toggleServer('${esc(u.name)}')" />
+          <span class="slider"></span>
+        </label>
+      </td>
+      <td>
+        <button class="btn sm" onclick="restartServer('${esc(u.name)}')">Restart</button>
+        <button class="btn sm danger" onclick="removeServer('${esc(u.name)}')">Remove</button>
+      </td>
+    </tr>`;
+  }
+}
+
+async function addServer() {
+  const name = document.getElementById('addName').value.trim();
+  const command = document.getElementById('addCommand').value.trim();
+  const argsStr = document.getElementById('addArgs').value.trim();
+  const msg = document.getElementById('addServerMsg');
+
+  if (!name || !command) { msg.textContent = 'Name and command are required.'; msg.style.color = 'var(--red)'; return; }
+
+  const args = argsStr ? argsStr.split(',').map(s => s.trim()) : [];
+  msg.innerHTML = '<span class="spinner"></span> Connecting...'; msg.style.color = 'var(--text2)';
+
+  try {
+    const res = await fetchJSON('/api/upstreams', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, command, args }),
+    });
+    if (res.error) { msg.textContent = res.error; msg.style.color = 'var(--red)'; }
+    else {
+      msg.textContent = `Added "${name}" (${res.status})`; msg.style.color = 'var(--green)';
+      document.getElementById('addName').value = '';
+      document.getElementById('addCommand').value = '';
+      document.getElementById('addArgs').value = '';
+      await refreshAll();
+    }
+  } catch (err) { msg.textContent = err.message; msg.style.color = 'var(--red)'; }
+}
+
+async function toggleServer(name) {
+  await fetchJSON(`/api/upstreams/${encodeURIComponent(name)}/toggle`, { method: 'POST' });
+  await refreshAll();
+}
+
+async function restartServer(name) {
+  await fetchJSON(`/api/upstreams/${encodeURIComponent(name)}/restart`, { method: 'POST' });
+  await refreshAll();
+}
+
+async function removeServer(name) {
+  if (!confirm(`Remove server "${name}"? This will disconnect and delete it from config.`)) return;
+  await fetchJSON(`/api/upstreams/${encodeURIComponent(name)}`, { method: 'DELETE' });
+  await refreshAll();
+}
+
+// ---- Tools ----
+function renderTools() {
+  const query = (document.getElementById('toolSearch').value || '').toLowerCase();
+  const filtered = toolsData.filter(t =>
+    t.name.toLowerCase().includes(query) ||
+    (t.description || '').toLowerCase().includes(query)
+  );
+  document.getElementById('toolCount').textContent = filtered.length;
+  const tbody = document.getElementById('toolsBody');
+  tbody.innerHTML = '';
+  for (const t of filtered) {
+    const params = t.inputSchema?.properties
+      ? Object.keys(t.inputSchema.properties).join(', ')
+      : '-';
+    tbody.innerHTML += `<tr>
+      <td><code>${esc(t.name)}</code></td>
+      <td style="max-width:350px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.description || '-')}</td>
+      <td style="font-size:.78rem">${esc(params)}</td>
+      <td><button class="btn sm" onclick="openPlayground('${esc(t.name)}')">Test</button></td>
+    </tr>`;
+  }
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text2)">No tools found.</td></tr>';
+  }
+}
+
+function openPlayground(toolName) {
+  // Switch to playground tab
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelector('[data-tab="playground"]').classList.add('active');
+  document.getElementById('tab-playground').classList.add('active');
+  // Select the tool
+  document.getElementById('pgTool').value = toolName;
+  onPlaygroundToolChange();
+}
+
+// ---- Playground ----
+function renderPlaygroundSelect() {
+  const sel = document.getElementById('pgTool');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Select a tool...</option>';
+  for (const t of toolsData) {
+    sel.innerHTML += `<option value="${esc(t.name)}">${esc(t.name)}</option>`;
+  }
+  sel.value = current;
+}
+
+function onPlaygroundToolChange() {
+  const name = document.getElementById('pgTool').value;
+  const tool = toolsData.find(t => t.name === name);
+  const schemaDiv = document.getElementById('pgSchema');
+  const argsArea = document.getElementById('pgArgs');
+  if (!tool) { schemaDiv.textContent = ''; argsArea.value = ''; return; }
+
+  schemaDiv.textContent = tool.description || 'No description';
+  // Pre-fill args template
+  if (tool.inputSchema?.properties) {
+    const template = {};
+    for (const [k, v] of Object.entries(tool.inputSchema.properties)) {
+      template[k] = v.default !== undefined ? v.default : `<${v.type || 'any'}>`;
+    }
+    argsArea.value = JSON.stringify(template, null, 2);
+  } else {
+    argsArea.value = '{}';
+  }
+}
+
+async function callTool() {
+  const name = document.getElementById('pgTool').value;
+  const output = document.getElementById('pgOutput');
+  if (!name) { output.textContent = 'Select a tool first.'; return; }
+
+  let args = {};
+  try {
+    const raw = document.getElementById('pgArgs').value.trim();
+    if (raw) args = JSON.parse(raw);
+  } catch (e) { output.textContent = 'Invalid JSON in arguments: ' + e.message; return; }
+
+  output.innerHTML = '<span class="spinner"></span> Calling...';
+
+  try {
+    const res = await fetch(API + '/api/tools/call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, arguments: args }),
+    });
+    const data = await res.json();
+    output.textContent = JSON.stringify(data, null, 2);
+    // Refresh stats after a call
+    setTimeout(refreshAll, 500);
+  } catch (err) {
+    output.textContent = 'Error: ' + err.message;
+  }
+}
+
+// ---- Stats ----
+function renderStats() {
+  if (!statsData?.analysis) return;
+  const a = statsData.analysis;
+
+  document.getElementById('stTotal').textContent = a.totalTokens.toLocaleString();
+  document.getElementById('stWasted').textContent = a.wastedTokens.toLocaleString();
+  document.getElementById('stWasteP').textContent = a.wastedPercent + '%';
+  document.getElementById('stErrors').textContent = a.errorProne.length;
+
+  // Dead tools
+  const deadTools = a.deadTools || [];
+  document.getElementById('deadCount').textContent = deadTools.length;
+  const deadBody = document.getElementById('deadBody');
+  deadBody.innerHTML = '';
+  for (const d of deadTools) {
+    deadBody.innerHTML += `<tr>
+      <td><code>${esc(d.tool)}</code></td>
+      <td>${esc(d.server)}</td>
+      <td>${d.tokenCost}</td>
+    </tr>`;
+  }
+  if (deadTools.length === 0) {
+    deadBody.innerHTML = '<tr><td colspan="3" style="color:var(--text2)">All tools are being used.</td></tr>';
+  }
+
+  // Per-server token bars
+  const barsDiv = document.getElementById('serverTokenBars');
+  barsDiv.innerHTML = '';
+  const maxTokens = Math.max(...Object.values(statsData.servers || {}).map(s => s.toolListTokenEstimate || 0), 1);
+  for (const [name, srvStats] of Object.entries(statsData.servers || {})) {
+    const pct = Math.round((srvStats.toolListTokenEstimate / maxTokens) * 100);
+    barsDiv.innerHTML += `
+      <div class="stat-bar">
+        <span class="stat-label">${esc(name)}</span>
+        <div class="bar"><div class="fill" style="width:${pct}%"></div></div>
+        <span class="stat-value">${srvStats.toolListTokenEstimate.toLocaleString()}</span>
+      </div>`;
+  }
+  if (Object.keys(statsData.servers || {}).length === 0) {
+    barsDiv.innerHTML = '<p style="color:var(--text2);font-size:.8rem">No data yet.</p>';
+  }
+
+  // Error-prone tools
+  const errorBody = document.getElementById('errorBody');
+  errorBody.innerHTML = '';
+  for (const e of a.errorProne) {
+    errorBody.innerHTML += `<tr>
+      <td><code>${esc(e.tool)}</code></td>
+      <td>${esc(e.server)}</td>
+      <td>${e.failureRate}%</td>
+      <td>${e.failures}</td>
+    </tr>`;
+  }
+  if (a.errorProne.length === 0) {
+    errorBody.innerHTML = '<tr><td colspan="4" style="color:var(--text2)">No error-prone tools.</td></tr>';
+  }
+}
+
+// ---- Utils ----
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ---- Init ----
+refreshAll();
+setInterval(refreshAll, 5000);
+</script>
+</body>
+</html>

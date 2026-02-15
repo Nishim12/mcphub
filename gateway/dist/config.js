@@ -2,7 +2,7 @@
  * Gateway configuration.
  * Supports both single-upstream (Stage 1 backward compat) and multi-upstream (Stage 2+).
  */
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { z } from "zod";
 /* ------------------------------------------------------------------ */
@@ -139,4 +139,25 @@ export function loadConfig() {
             args: ["-y", "@modelcontextprotocol/server-everything"],
         },
     });
+}
+/**
+ * Save the current runtime config back to a config file.
+ * Uses MCP_GATEWAY_CONFIG, then config.json in CWD.
+ */
+export function saveConfig(config) {
+    const configPath = process.env.MCP_GATEWAY_CONFIG ??
+        resolve(process.cwd(), "config.json");
+    const data = {
+        port: config.port,
+        cacheTtlSeconds: config.cacheTtlSeconds,
+        resilience: config.resilience,
+        upstreams: config.upstreams.map((u) => ({
+            name: u.name,
+            command: u.command,
+            args: u.args,
+            ...(u.env ? { env: u.env } : {}),
+        })),
+    };
+    writeFileSync(configPath, JSON.stringify(data, null, 2) + "\n", "utf-8");
+    console.log(`  [config] Saved to ${configPath}`);
 }

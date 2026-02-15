@@ -1,8 +1,8 @@
 /**
- * MCP API Gateway — Multi-Upstream
+ * MCP API Gateway — Multi-Upstream with Management Dashboard
  *
  * HTTP server that accepts MCP JSON-RPC requests, aggregates tools
- * from multiple upstream MCP servers, and routes tool calls to the
- * correct server.
+ * from multiple upstream MCP servers, routes tool calls to the
+ * correct server, and exposes a management dashboard + REST API.
  */
 export {};

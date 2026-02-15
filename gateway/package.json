@@ -1,7 +1,7 @@
 {
   "name": "mcp-gateway",
-  "version": "0.1.0",
-  "description": "MCP API Gateway - single-upstream proxy (Stage 1)",
+  "version": "0.2.0",
+  "description": "MCP API Gateway - intelligent multi-server proxy with caching, resilience, and usage monitoring",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {

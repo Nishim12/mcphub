@@ -1,11 +1,16 @@
 /**
- * Single-upstream MCP proxy. Forwards JSON-RPC requests to an upstream
- * MCP server via stdio transport.
+ * Multi-upstream MCP proxy.
+ * Manages one MCP SDK Client per upstream server (stdio transport).
+ * Provides connect / disconnect lifecycle and per-server request forwarding.
  */
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import type { GatewayConfig } from "./config.js";
+import type { UpstreamConfig } from "./config.js";
+
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
 
 export type JsonRpcRequest = {
   jsonrpc: "2.0";
@@ -21,94 +26,102 @@ export type JsonRpcResponse = {
   error?: { code: number; message: string; data?: unknown };
 };
 
-let upstreamClient: Client | null = null;
+export type UpstreamState = {
+  config: UpstreamConfig;
+  client: Client;
+  status: "connected" | "disconnected" | "error";
+  lastError?: string;
+};
+
+/* ------------------------------------------------------------------ */
+/*  UpstreamManager                                                    */
+/* ------------------------------------------------------------------ */
 
 /**
- * Create or return the singleton upstream client. Connects on first use.
+ * Manages MCP SDK Client instances for all configured upstream servers.
  */
-async function getUpstreamClient(config: GatewayConfig): Promise<Client> {
-  if (upstreamClient) {
-    return upstreamClient;
+export class UpstreamManager {
+  private upstreams = new Map<string, UpstreamState>();
+
+  /** Connect to a single upstream. Returns true on success. */
+  async connect(cfg: UpstreamConfig): Promise<boolean> {
+    try {
+      const transport = new StdioClientTransport({
+        command: cfg.command,
+        args: cfg.args,
+        env: cfg.env as Record<string, string> | undefined,
+      });
+
+      const client = new Client(
+        { name: "mcp-gateway", version: "0.2.0" },
+        { capabilities: {} }
+      );
+
+      await client.connect(transport);
+
+      this.upstreams.set(cfg.name, {
+        config: cfg,
+        client,
+        status: "connected",
+      });
+
+      console.log(`  [upstream] Connected: ${cfg.name}`);
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`  [upstream] Failed to connect "${cfg.name}": ${message}`);
+      this.upstreams.set(cfg.name, {
+        config: cfg,
+        client: null as unknown as Client, // placeholder
+        status: "error",
+        lastError: message,
+      });
+      return false;
+    }
   }
 
-  const transport = new StdioClientTransport({
-    command: config.upstream.command,
-    args: config.upstream.args,
-  });
+  /** Connect to all upstreams. Continues even if some fail. */
+  async connectAll(configs: UpstreamConfig[]): Promise<void> {
+    await Promise.all(configs.map((cfg) => this.connect(cfg)));
+  }
 
-  const client = new Client(
-    {
-      name: "mcp-gateway",
-      version: "0.1.0",
-    },
-    { capabilities: {} }
-  );
+  /** Get a connected upstream by name. Returns undefined if not connected. */
+  get(name: string): UpstreamState | undefined {
+    const state = this.upstreams.get(name);
+    if (state && state.status === "connected") return state;
+    return undefined;
+  }
 
-  await client.connect(transport);
-  upstreamClient = client;
-  return client;
-}
+  /** Return all upstream states (for health / status endpoints). */
+  getAll(): Map<string, UpstreamState> {
+    return this.upstreams;
+  }
 
-/**
- * Forward a JSON-RPC request to the upstream MCP server and return the response.
- * Handles: initialize, tools/list, tools/call
- */
-export async function forwardRequest(
-  config: GatewayConfig,
-  request: JsonRpcRequest
-): Promise<JsonRpcResponse> {
-  const id = request.id ?? null;
-  const method = request.method;
-  const params = (request.params ?? {}) as Record<string, unknown>;
+  /** Return only healthy (connected) upstreams. */
+  getHealthy(): UpstreamState[] {
+    return [...this.upstreams.values()].filter(
+      (s) => s.status === "connected"
+    );
+  }
 
-  try {
-    const client = await getUpstreamClient(config);
-
-    if (method === "initialize") {
-      // Already done by connect(); return server capabilities
-      const serverCaps = client.getServerCapabilities();
-      const serverVersion = client.getServerVersion();
-      const result = {
-        protocolVersion: "2024-11-05",
-        capabilities: serverCaps ?? {},
-        serverInfo: serverVersion ?? { name: "mcp-gateway-upstream", version: "0.1.0" },
-      };
-      return { jsonrpc: "2.0", id, result };
-    }
-
-    if (method === "tools/list") {
-      const response = await client.listTools();
-      return { jsonrpc: "2.0", id, result: response };
-    }
-
-    if (method === "tools/call") {
-      const name = params.name as string;
-      const args = (params.arguments ?? {}) as Record<string, unknown>;
-      if (!name) {
-        return {
-          jsonrpc: "2.0",
-          id,
-          error: { code: -32602, message: "Missing tool name in params" },
-        };
+  /** Disconnect a single upstream. */
+  async disconnect(name: string): Promise<void> {
+    const state = this.upstreams.get(name);
+    if (!state) return;
+    try {
+      if (state.status === "connected") {
+        await state.client.close();
       }
-      const response = await client.callTool({ name, arguments: args });
-      return { jsonrpc: "2.0", id, result: response };
+    } catch {
+      // ignore close errors
     }
+    state.status = "disconnected";
+  }
 
-    return {
-      jsonrpc: "2.0",
-      id,
-      error: {
-        code: -32601,
-        message: `Method not supported by gateway: ${method}`,
-      },
-    };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return {
-      jsonrpc: "2.0",
-      id,
-      error: { code: -32603, message: `Internal error: ${message}` },
-    };
+  /** Disconnect all upstreams. */
+  async disconnectAll(): Promise<void> {
+    await Promise.all(
+      [...this.upstreams.keys()].map((name) => this.disconnect(name))
+    );
   }
 }

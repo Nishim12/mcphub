@@ -1,7 +1,17 @@
 {
   "port": 3010,
-  "upstream": {
-    "command": "npx",
-    "args": ["-y", "@modelcontextprotocol/server-everything"]
-  }
+  "cacheTtlSeconds": 60,
+  "resilience": {
+    "timeoutMs": 10000,
+    "maxRetries": 2,
+    "circuitBreakerThreshold": 5,
+    "circuitBreakerResetMs": 30000
+  },
+  "upstreams": [
+    {
+      "name": "everything",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-everything"]
+    }
+  ]
 }

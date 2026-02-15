@@ -59,4 +59,9 @@ export type GatewayConfig = {
  * 4. config.example.json in CWD
  */
 export declare function loadConfig(): GatewayConfig;
+/**
+ * Save the current runtime config back to a config file.
+ * Uses MCP_GATEWAY_CONFIG, then config.json in CWD.
+ */
+export declare function saveConfig(config: GatewayConfig): void;
 export {};

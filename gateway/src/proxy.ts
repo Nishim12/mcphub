@@ -1,7 +1,7 @@
 /**
  * Multi-upstream MCP proxy.
  * Manages one MCP SDK Client per upstream server (stdio transport).
- * Provides connect / disconnect lifecycle and per-server request forwarding.
+ * Provides connect / disconnect / remove / toggle lifecycle.
  */
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -26,11 +26,15 @@ export type JsonRpcResponse = {
   error?: { code: number; message: string; data?: unknown };
 };
 
+export type UpstreamStatus = "connected" | "disconnected" | "error" | "disabled";
+
 export type UpstreamState = {
   config: UpstreamConfig;
   client: Client;
-  status: "connected" | "disconnected" | "error";
+  status: UpstreamStatus;
+  enabled: boolean;
   lastError?: string;
+  connectedAt?: string;
 };
 
 /* ------------------------------------------------------------------ */
@@ -63,6 +67,8 @@ export class UpstreamManager {
         config: cfg,
         client,
         status: "connected",
+        enabled: true,
+        connectedAt: new Date().toISOString(),
       });
 
       console.log(`  [upstream] Connected: ${cfg.name}`);
@@ -72,8 +78,9 @@ export class UpstreamManager {
       console.error(`  [upstream] Failed to connect "${cfg.name}": ${message}`);
       this.upstreams.set(cfg.name, {
         config: cfg,
-        client: null as unknown as Client, // placeholder
+        client: null as unknown as Client,
         status: "error",
+        enabled: true,
         lastError: message,
       });
       return false;
@@ -88,7 +95,7 @@ export class UpstreamManager {
   /** Get a connected upstream by name. Returns undefined if not connected. */
   get(name: string): UpstreamState | undefined {
     const state = this.upstreams.get(name);
-    if (state && state.status === "connected") return state;
+    if (state && state.status === "connected" && state.enabled) return state;
     return undefined;
   }
 
@@ -97,14 +104,14 @@ export class UpstreamManager {
     return this.upstreams;
   }
 
-  /** Return only healthy (connected) upstreams. */
+  /** Return only healthy (connected + enabled) upstreams. */
   getHealthy(): UpstreamState[] {
     return [...this.upstreams.values()].filter(
-      (s) => s.status === "connected"
+      (s) => s.status === "connected" && s.enabled
     );
   }
 
-  /** Disconnect a single upstream. */
+  /** Disconnect a single upstream (keeps it in the map as disconnected). */
   async disconnect(name: string): Promise<void> {
     const state = this.upstreams.get(name);
     if (!state) return;
@@ -123,5 +130,39 @@ export class UpstreamManager {
     await Promise.all(
       [...this.upstreams.keys()].map((name) => this.disconnect(name))
     );
+  }
+
+  /** Remove an upstream entirely (disconnect + delete from map). */
+  async remove(name: string): Promise<boolean> {
+    const state = this.upstreams.get(name);
+    if (!state) return false;
+    await this.disconnect(name);
+    this.upstreams.delete(name);
+    return true;
+  }
+
+  /**
+   * Toggle an upstream enabled/disabled.
+   * Disabled upstreams are disconnected but stay in the map.
+   * Re-enabling reconnects them.
+   */
+  async toggle(name: string): Promise<{ enabled: boolean } | null> {
+    const state = this.upstreams.get(name);
+    if (!state) return null;
+
+    if (state.enabled) {
+      // Disable: disconnect
+      await this.disconnect(name);
+      state.enabled = false;
+      state.status = "disabled";
+      console.log(`  [upstream] Disabled: ${name}`);
+      return { enabled: false };
+    } else {
+      // Enable: reconnect
+      state.enabled = true;
+      const ok = await this.connect(state.config);
+      console.log(`  [upstream] Enabled: ${name} (connected=${ok})`);
+      return { enabled: true };
+    }
   }
 }

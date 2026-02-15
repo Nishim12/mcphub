@@ -1,14 +1,19 @@
 {
   "name": "mcp-gateway",
-  "version": "0.2.0",
-  "description": "MCP API Gateway - intelligent multi-server proxy with caching, resilience, and usage monitoring",
+  "version": "0.3.0",
+  "description": "MCP API Gateway - intelligent multi-server proxy with caching, resilience, and usage monitoring. Supports Streamable HTTP, SSE, and stdio transports for universal agent compatibility.",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "mcp-gateway": "dist/stdio.js"
+  },
   "scripts": {
     "build": "tsc",
     "build:all": "tsc && cd dashboard && npm run build",
     "start": "node dist/index.js",
-    "dev": "tsx src/index.ts"
+    "start:stdio": "node dist/stdio.js",
+    "dev": "tsx src/index.ts",
+    "dev:stdio": "tsx src/stdio.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",

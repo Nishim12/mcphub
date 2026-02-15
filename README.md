@@ -16,21 +16,29 @@ MCP Hub solves these by acting as a single MCP endpoint that aggregates, optimiz
 ## Architecture
 
 ```
-┌─────────────────┐                              ┌──────────────────┐
-│  AI Client      │   MCP JSON-RPC over HTTP     │  MCP Hub Gateway │
-│  (Cursor, etc.) │ ◄──────────────────────────► │                  │
-└─────────────────┘                              │  • Aggregation   │
-                                                 │  • Caching       │
-                                                 │  • Resilience    │
-                                                 │  • Monitoring    │
-                                                 │  • Dashboard     │
-                                                 └────────┬─────────┘
-                          ┌──────────────────────────────┼──────────────────────────────┐
-                          ▼                              ▼                              ▼
-                  ┌───────────────┐              ┌───────────────┐              ┌───────────────┐
-                  │ MCP Server A  │              │ MCP Server B  │              │ MCP Server C  │
-                  │ (e.g. GitHub) │              │ (e.g. Postgres)│              │ (e.g. Files)  │
-                  └───────────────┘              └───────────────┘              └───────────────┘
+┌──────────────────────────────────────┐
+│           AI Coding Agents           │
+│  Cursor, Claude Desktop, Claude Code │
+│  Cline, Windsurf, Codex, Copilot    │
+└───────┬──────────┬──────────┬────────┘
+        │          │          │
+  Streamable     SSE       stdio
+    HTTP      (legacy)   (spawn)
+   /mcp       /sse      npx mcp-gateway
+        │          │          │
+┌───────▼──────────▼──────────▼────────┐
+│          MCP Hub Gateway             │
+│  • Multi-transport (HTTP, SSE, stdio)│
+│  • Aggregation  • Caching            │
+│  • Resilience   • Monitoring         │
+│  • Dashboard    • Protocol fixer     │
+└────────────────┬─────────────────────┘
+       ┌─────────┼─────────┐
+       ▼         ▼         ▼
+┌────────────┐┌────────────┐┌────────────┐
+│ MCP Server ││ MCP Server ││ MCP Server │
+│  (GitHub)  ││ (Postgres) ││  (Files)   │
+└────────────┘└────────────┘└────────────┘
 ```
 
 ## What's Completed
@@ -53,11 +61,24 @@ MCP Hub solves these by acting as a single MCP endpoint that aggregates, optimiz
 - **Playground tab** — Select any tool, fill in arguments, execute it, and see the response — all from the browser.
 - **Stats tab** — Token overhead per server (with bar chart), dead tool report, error-prone tool report, wasted token percentage.
 
+### Universal Agent Compatibility
+
+MCP Hub supports all three MCP transport types, so **any** coding agent can connect:
+
+| Transport | Endpoint | Protocol Version | Agents |
+|-----------|----------|-----------------|--------|
+| **Streamable HTTP** | `/mcp` (POST/GET/DELETE) | 2025-11-25 | Cursor, newer agents |
+| **SSE** (legacy) | `/sse` (GET) + `/messages` (POST) | 2024-11-05 | Cline, Windsurf, Claude Desktop |
+| **stdio** | `npx mcp-gateway` | N/A (stdin/stdout) | Claude Code, Codex, GitHub Copilot, Continue |
+
 ### REST API
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/` | POST | MCP JSON-RPC endpoint (single or batch) |
+| `/mcp` | POST/GET/DELETE | Streamable HTTP transport (MCP 2025-11-25) |
+| `/sse` | GET | SSE transport — establish event stream (MCP 2024-11-05) |
+| `/messages` | POST | SSE transport — send messages |
+| `/` | POST | Legacy JSON-RPC endpoint (backward compat) |
 | `/health` | GET | Gateway health, upstream status, circuit states |
 | `/stats` | GET | Usage statistics and analysis |
 | `/api/upstreams` | GET | List all upstream servers with details |
@@ -179,15 +200,23 @@ export MCP_GATEWAY_CONFIG=/path/to/config.json
 # Build everything (gateway + dashboard)
 npm run build:all
 
-# Start the gateway
+# Start the HTTP gateway (serves all HTTP transports + dashboard)
 npm start
 ```
 
 The gateway will be available at:
 
-- `http://localhost:3010/` — MCP JSON-RPC endpoint
+- `http://localhost:3010/mcp` — Streamable HTTP transport (for Cursor, etc.)
+- `http://localhost:3010/sse` — SSE transport (for Cline, Windsurf, etc.)
 - `http://localhost:3010/dashboard` — Management dashboard
 - `http://localhost:3010/health` — Health check
+
+For agents that use stdio (Claude Code, Codex, Copilot), they spawn the process directly:
+
+```bash
+# The agent runs this command and communicates via stdin/stdout
+npx mcp-gateway
+```
 
 ### Development Mode
 
@@ -195,26 +224,147 @@ The gateway will be available at:
 # Run gateway with hot reload (no build step needed)
 npm run dev
 
+# Or run stdio mode for testing
+npm run dev:stdio
+
 # In a separate terminal, run dashboard dev server
 cd dashboard
 npm run dev
 ```
 
-### Point Your AI Agent at the Gateway
+### Connect Your AI Agent
 
-Configure your agent to use the gateway as its MCP server. For example, in Cursor's `mcp.json`:
+MCP Hub works with **any** coding agent. Pick the config snippet for your agent below.
+
+> **Tip:** Start the gateway first (`npm start` from `gateway/`), then configure your agent.
+
+#### Cursor
+
+Add to your Cursor MCP config (`.cursor/mcp.json` or project-level):
 
 ```json
 {
   "mcpServers": {
     "hub": {
-      "url": "http://localhost:3010/"
+      "url": "http://localhost:3010/mcp"
     }
   }
 }
 ```
 
-Now your agent talks to one endpoint and gets tools from all your configured upstream servers.
+#### Claude Desktop
+
+Add to `claude_desktop_config.json`:
+
+**Option A — stdio (recommended, no separate server needed):**
+
+```json
+{
+  "mcpServers": {
+    "hub": {
+      "command": "npx",
+      "args": ["mcp-gateway"],
+      "env": {
+        "MCP_GATEWAY_CONFIG": "/path/to/your/config.json"
+      }
+    }
+  }
+}
+```
+
+**Option B — SSE (requires gateway running):**
+
+```json
+{
+  "mcpServers": {
+    "hub": {
+      "url": "http://localhost:3010/sse"
+    }
+  }
+}
+```
+
+#### Claude Code / Codex (CLI)
+
+```bash
+# Claude Code will spawn the process and communicate via stdio
+claude mcp add hub -- npx mcp-gateway
+```
+
+Or set the config env var first:
+
+```bash
+export MCP_GATEWAY_CONFIG=/path/to/config.json
+claude mcp add hub -- npx mcp-gateway
+```
+
+#### Cline (VS Code Extension)
+
+In Cline's MCP server settings, add:
+
+```json
+{
+  "mcpServers": {
+    "hub": {
+      "url": "http://localhost:3010/sse"
+    }
+  }
+}
+```
+
+#### Windsurf
+
+In Windsurf's MCP config:
+
+```json
+{
+  "mcpServers": {
+    "hub": {
+      "serverUrl": "http://localhost:3010/sse"
+    }
+  }
+}
+```
+
+#### GitHub Copilot
+
+In your VS Code `settings.json`:
+
+```json
+{
+  "github.copilot.chat.mcpServers": {
+    "hub": {
+      "command": "npx",
+      "args": ["mcp-gateway"],
+      "env": {
+        "MCP_GATEWAY_CONFIG": "/path/to/your/config.json"
+      }
+    }
+  }
+}
+```
+
+#### Continue
+
+In `.continue/config.yaml`:
+
+```yaml
+mcpServers:
+  - name: hub
+    command: npx
+    args:
+      - mcp-gateway
+    env:
+      MCP_GATEWAY_CONFIG: /path/to/your/config.json
+```
+
+#### Any Other Agent
+
+MCP Hub supports all standard MCP transports. Use whichever your agent supports:
+
+- **Streamable HTTP**: Point to `http://localhost:3010/mcp`
+- **SSE**: Point to `http://localhost:3010/sse`
+- **stdio**: Spawn `npx mcp-gateway` (set `MCP_GATEWAY_CONFIG` env var if needed)
 
 ## Project Structure
 
@@ -224,11 +374,13 @@ mcphub/
 ├── docs/
 │   └── MCP_API_GATEWAY_PLAN.md      # Detailed technical plan
 ├── gateway/
-│   ├── package.json                 # Gateway dependencies
+│   ├── package.json                 # Gateway dependencies (bin: mcp-gateway)
 │   ├── tsconfig.json                # TypeScript config
 │   ├── config.example.json          # Example configuration
 │   ├── src/
-│   │   ├── index.ts                 # Express server, REST API, entry point
+│   │   ├── index.ts                 # Express server, all HTTP transports, REST API
+│   │   ├── stdio.ts                 # stdio transport entry point (npx mcp-gateway)
+│   │   ├── mcp-server.ts           # MCP Server factory (wires SDK to aggregation)
 │   │   ├── config.ts                # Config loading & validation (Zod)
 │   │   ├── proxy.ts                 # Upstream MCP client management
 │   │   ├── aggregate.ts             # Multi-server aggregation & routing

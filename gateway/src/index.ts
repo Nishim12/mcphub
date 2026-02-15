@@ -4,9 +4,15 @@
  * HTTP server that accepts MCP JSON-RPC requests, aggregates tools
  * from multiple upstream MCP servers, routes tool calls to the
  * correct server, and exposes a management dashboard + REST API.
+ *
+ * Supports three MCP transports so any coding agent can connect:
+ *   - Streamable HTTP  (POST/GET/DELETE /mcp)  — Cursor, newer agents
+ *   - SSE              (GET /sse, POST /messages) — Cline, Windsurf, Claude Desktop
+ *   - stdio            (see stdio.ts entry point) — Claude Code, Codex, Copilot
  */
 
 import { existsSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
@@ -14,6 +20,11 @@ import { loadConfig, saveConfig, type UpstreamConfig } from "./config.js";
 import { UpstreamManager, type JsonRpcRequest } from "./proxy.js";
 import { handleRequest, getCircuitStates } from "./aggregate.js";
 import { UsageMonitor } from "./monitor.js";
+import { createGatewayServer } from "./mcp-server.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
+import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const startedAt = new Date().toISOString();
@@ -46,7 +57,136 @@ async function main() {
   app.use(express.json({ limit: "1mb" }));
 
   /* ================================================================ */
-  /*  MCP JSON-RPC endpoint                                           */
+  /*  Transport session management                                     */
+  /* ================================================================ */
+
+  /** Active transport sessions keyed by session ID */
+  const transports: Record<string, Transport> = {};
+
+  /* ================================================================ */
+  /*  Streamable HTTP transport  (POST/GET/DELETE /mcp)                */
+  /*  Protocol version 2025-11-25 — Cursor, newer agents              */
+  /* ================================================================ */
+
+  app.post("/mcp", async (req, res) => {
+    try {
+      const sessionId = req.headers["mcp-session-id"] as string | undefined;
+      let transport: StreamableHTTPServerTransport;
+
+      if (sessionId && transports[sessionId]) {
+        const existing = transports[sessionId];
+        if (!(existing instanceof StreamableHTTPServerTransport)) {
+          res.status(400).json({
+            jsonrpc: "2.0",
+            error: { code: -32000, message: "Session uses a different transport" },
+            id: null,
+          });
+          return;
+        }
+        transport = existing;
+      } else if (!sessionId && isInitializeRequest(req.body)) {
+        // New session — create transport + server
+        transport = new StreamableHTTPServerTransport({
+          sessionIdGenerator: () => randomUUID(),
+          onsessioninitialized: (sid) => {
+            console.log(`  [streamable-http] Session initialized: ${sid}`);
+            transports[sid] = transport;
+          },
+        });
+        transport.onclose = () => {
+          const sid = transport.sessionId;
+          if (sid && transports[sid]) {
+            console.log(`  [streamable-http] Session closed: ${sid}`);
+            delete transports[sid];
+          }
+        };
+        const server = createGatewayServer(config, manager, monitor);
+        await server.connect(transport);
+        await transport.handleRequest(req, res, req.body);
+        return;
+      } else {
+        res.status(400).json({
+          jsonrpc: "2.0",
+          error: { code: -32000, message: "Bad Request: No valid session ID" },
+          id: null,
+        });
+        return;
+      }
+
+      await transport.handleRequest(req, res, req.body);
+    } catch (err) {
+      console.error("[streamable-http] Error:", err);
+      if (!res.headersSent) {
+        res.status(500).json({
+          jsonrpc: "2.0",
+          error: { code: -32603, message: "Internal server error" },
+          id: null,
+        });
+      }
+    }
+  });
+
+  app.get("/mcp", async (req, res) => {
+    const sessionId = req.headers["mcp-session-id"] as string | undefined;
+    if (!sessionId || !transports[sessionId]) {
+      res.status(400).send("Invalid or missing session ID");
+      return;
+    }
+    const transport = transports[sessionId];
+    if (transport instanceof StreamableHTTPServerTransport) {
+      await transport.handleRequest(req, res);
+    } else {
+      res.status(400).send("Session uses a different transport");
+    }
+  });
+
+  app.delete("/mcp", async (req, res) => {
+    const sessionId = req.headers["mcp-session-id"] as string | undefined;
+    if (!sessionId || !transports[sessionId]) {
+      res.status(400).send("Invalid or missing session ID");
+      return;
+    }
+    const transport = transports[sessionId];
+    if (transport instanceof StreamableHTTPServerTransport) {
+      await transport.handleRequest(req, res);
+    } else {
+      res.status(400).send("Session uses a different transport");
+    }
+  });
+
+  /* ================================================================ */
+  /*  Legacy SSE transport  (GET /sse, POST /messages)                 */
+  /*  Protocol version 2024-11-05 — Cline, Windsurf, Claude Desktop   */
+  /* ================================================================ */
+
+  app.get("/sse", async (_req, res) => {
+    console.log("  [sse] New SSE connection");
+    const transport = new SSEServerTransport("/messages", res);
+    transports[transport.sessionId] = transport;
+    res.on("close", () => {
+      console.log(`  [sse] Connection closed: ${transport.sessionId}`);
+      delete transports[transport.sessionId];
+    });
+    const server = createGatewayServer(config, manager, monitor);
+    await server.connect(transport);
+  });
+
+  app.post("/messages", async (req, res) => {
+    const sessionId = req.query.sessionId as string | undefined;
+    if (!sessionId || !transports[sessionId]) {
+      res.status(400).send("Invalid or missing sessionId query parameter");
+      return;
+    }
+    const transport = transports[sessionId];
+    if (transport instanceof SSEServerTransport) {
+      await transport.handlePostMessage(req, res, req.body);
+    } else {
+      res.status(400).send("Session uses a different transport");
+    }
+  });
+
+  /* ================================================================ */
+  /*  Legacy JSON-RPC endpoint (backward compat)                       */
   /* ================================================================ */
   app.post("/", async (req, res) => {
     try {
@@ -381,17 +521,32 @@ async function main() {
   const port = config.port;
   app.listen(port, () => {
     console.log(`\nMCP Gateway listening on http://localhost:${port}`);
-    console.log(`  POST /          - MCP JSON-RPC endpoint`);
-    console.log(`  GET  /health    - Health check & upstream status`);
-    console.log(`  GET  /stats     - Usage stats & insights`);
-    console.log(`  GET  /dashboard - Management dashboard`);
-    console.log(`  /api/*          - Management REST API`);
-    console.log(`  /api/registry/* - MCP Server Registry (search)`);
+    console.log(`\n  MCP Transports (for AI agents):`);
+    console.log(`    /mcp          - Streamable HTTP  (Cursor, newer agents)`);
+    console.log(`    /sse          - SSE              (Cline, Windsurf, Claude Desktop)`);
+    console.log(`    stdio         - Run: npx mcp-gateway  (Claude Code, Codex, Copilot)`);
+    console.log(`\n  Legacy & Management:`);
+    console.log(`    POST /        - JSON-RPC endpoint (backward compat)`);
+    console.log(`    GET  /health  - Health check & upstream status`);
+    console.log(`    GET  /stats   - Usage stats & insights`);
+    console.log(`    /dashboard    - Management dashboard`);
+    console.log(`    /api/*        - REST API`);
   });
 
   /* ---- Graceful shutdown ---- */
   const shutdown = async () => {
     console.log("\nShutting down gateway...");
+
+    // Close all active transport sessions
+    for (const sid of Object.keys(transports)) {
+      try {
+        await transports[sid].close();
+        delete transports[sid];
+      } catch {
+        // ignore close errors during shutdown
+      }
+    }
+
     monitor.shutdown();
     await manager.disconnectAll();
     process.exit(0);

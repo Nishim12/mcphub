@@ -5,7 +5,8 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc && cp src/dashboard.html dist/dashboard.html",
+    "build": "tsc",
+    "build:all": "tsc && cd dashboard && npm run build",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts"
   },

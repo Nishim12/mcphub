@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #181a20;
+  --color-surface-2: #1e2028;
+  --color-border: #2a2d38;
+}
